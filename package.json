@@ -2,6 +2,7 @@
   "name": "codex-journey-dashboard",
   "version": "0.1.0",
   "private": true,
+  "files": ["dist", "tools/scan_local.py", "README.md", "LICENSE"],
   "type": "module",
   "scripts": {
     "dev": "vite --host 127.0.0.1",
@@ -10,6 +11,7 @@
     "lint": "eslint .",
     "typecheck": "tsc -b --pretty false",
     "test": "vitest run",
+    "test:scanner": "python3 -m unittest discover -s tests -p 'test_scan_*.py'",
     "test:e2e": "playwright test",
     "scan": "python3 tools/scan_local.py"
   },

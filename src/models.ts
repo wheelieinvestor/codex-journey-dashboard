@@ -5,5 +5,5 @@ export type Score = { impact: number; urgency: number; unlock: number; staleness
 export type Project = { id: string; name: string; area: string; status: Status; summary: string; next: string; updatedAt: string; score: Score; evidence: Evidence[]; blocker?: string; gate?: string; milestones: string[]; decisions?: string[] };
 export type Idea = { id: string; title: string; rationale: string; relatedProject?: string; score: number };
 export type JourneyData = { schema: "codex-journey/v1"; generatedAt: string; projects: Project[]; ideas: Idea[] };
-export type OpsEvent = { schema: "codex-ops-event/v1"; event: string; timestamp: string; project?: string; thread_id?: string; artifact?: string };
+export type OpsEvent = { schema: "codex-ops-event/v1"; event?: string; timestamp?: string; project?: string; thread_id?: string; artifact?: string; kind?: string; occurred_at?: string; feature?: string; payload?: Record<string, unknown> };
 export type Correction = { projectId: string; status?: Status; area?: string; note?: string; at: string };

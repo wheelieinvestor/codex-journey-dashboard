@@ -1,5 +1,5 @@
 import "./style.css";
-import { applyCorrections, conflicts, exportMarkdown, rank, score, scoreExplanation, stale } from "./core";
+import { applyCorrections, conflicts, exportMarkdown, normalizeData, rank, safeHref, score, scoreExplanation, stale } from "./core";
 import { demo } from "./fixtures";
 import type { Correction, JourneyData, Project, Status } from "./models";
 
@@ -7,12 +7,13 @@ type View = "Today"|"Journey"|"Projects"|"Completed"|"Waiting on Me"|"Ideas"|"Ev
 const views: View[] = ["Today","Journey","Projects","Completed","Waiting on Me","Ideas","Evidence"];
 let data: JourneyData = demo; let view: View = "Today";
 const saved = localStorage.getItem("codex-journey-corrections/v1");
-const corrections: Correction[] = saved ? JSON.parse(saved) : [];
+let corrections: Correction[] = [];
+try { corrections=saved ? JSON.parse(saved) as Correction[] : []; if(!Array.isArray(corrections))corrections=[]; } catch { localStorage.removeItem("codex-journey-corrections/v1"); }
 const root = document.querySelector<HTMLDivElement>("#app")!;
 
 function esc(value:string):string { const el=document.createElement("span"); el.textContent=value; return el.innerHTML; }
 function badge(p:Project):string { return `<span class="status status-${p.status.replace(/ /g,"-")}"><i></i>${esc(p.status)}</span>`; }
-function evidence(p:Project):string { return `<div class="evidence">${p.evidence.slice(0,2).map(e=>`<${e.href?`a href="${e.href}" target="_blank" rel="noreferrer"`:"span"} class="evidence-chip"><b>${e.type}</b> ${esc(e.label)} · ${Math.round(e.confidence*100)}%</${e.href?"a":"span"}>`).join("")}</div>`; }
+function evidence(p:Project):string { return `<div class="evidence">${p.evidence.slice(0,2).map(e=>{const href=safeHref(e.href);return `<${href?`a href="${esc(href)}" target="_blank" rel="noreferrer"`:"span"} class="evidence-chip"><b>${e.type}</b> ${esc(e.label)} · ${Math.round(e.confidence*100)}%</${href?"a":"span"}>`}).join("")}</div>`; }
 function projectCard(p:Project, priority=false):string { const s=score(p.score); return `<article class="project-card ${priority?"priority":""}">
   <div class="project-top"><div><p class="eyebrow">${esc(p.area)}</p><h3>${esc(p.name)}</h3></div>${badge(p)}</div>
   <p class="summary">${esc(p.summary)}</p>${(p.blocker||p.gate)?`<div class="attention"><span>Needs you</span>${esc(p.blocker??p.gate??"")}</div>`:""}
@@ -34,6 +35,6 @@ root.innerHTML=`<aside><div class="brand"><span>CJ</span><b>CODEX<br/>JOURNEY</b
 function icon(v:View):string { return ({Today:"⌁",Journey:"↗",Projects:"▦",Completed:"✓","Waiting on Me":"!",Ideas:"✦",Evidence:"⌘"})[v]; }
 function bind():void { document.querySelectorAll<HTMLElement>("[data-nav]").forEach(el=>el.onclick=()=>{view=el.dataset.nav as View;render()}); document.querySelector(".menu")?.addEventListener("click",()=>document.querySelector("aside")?.classList.toggle("open")); document.querySelectorAll<HTMLElement>("[data-correct]").forEach(el=>el.onclick=()=>openCorrection(el.dataset.correct!)); document.querySelector("#export")?.addEventListener("click",async()=>{await navigator.clipboard.writeText(exportMarkdown(data)); toast("Planning context copied")}); document.querySelector("#import")?.addEventListener("click",()=>importPicker()); }
 function openCorrection(id:string):void { const p=data.projects.find(x=>x.id===id)!; const modal=document.querySelector("#modal")!; modal.innerHTML=`<div class="modal-back"><form class="modal"><button type="button" class="close" aria-label="Close">×</button><p class="eyebrow">YOUR CORRECTION WINS</p><h2>${esc(p.name)}</h2><label>Status<select name="status">${["started","in progress","waiting","blocked","implemented","merged","deployed","activated","verified","paused","abandoned"].map(s=>`<option ${s===p.status?"selected":""}>${s}</option>`).join("")}</select></label><label>Note<textarea name="note" placeholder="What should Codex Journey know?"></textarea></label><button class="primary" type="submit">Save correction</button></form></div>`; modal.querySelector(".close")?.addEventListener("click",()=>modal.innerHTML=""); modal.querySelector("form")?.addEventListener("submit",e=>{e.preventDefault();const f=new FormData(e.currentTarget as HTMLFormElement);corrections.push({projectId:id,status:f.get("status") as Status,note:String(f.get("note")??""),at:new Date().toISOString()});localStorage.setItem("codex-journey-corrections/v1",JSON.stringify(corrections));render();toast("Correction saved locally")}); }
-function importPicker():void { const input=document.createElement("input");input.type="file";input.accept="application/json,.jsonl";input.onchange=async()=>{const file=input.files?.[0];if(!file)return;try{const parsed=JSON.parse(await file.text()) as JourneyData;if(parsed.schema!=="codex-journey/v1")throw Error();demo.projects=parsed.projects;demo.ideas=parsed.ideas;demo.generatedAt=parsed.generatedAt;render();toast("Snapshot imported locally")}catch{toast("That file is not a Journey snapshot")}};input.click(); }
+function importPicker():void { const input=document.createElement("input");input.type="file";input.accept="application/json";input.onchange=async()=>{const file=input.files?.[0];if(!file)return;try{const parsed=normalizeData(JSON.parse(await file.text()));demo.projects=parsed.projects;demo.ideas=parsed.ideas;demo.generatedAt=parsed.generatedAt;render();toast("Snapshot imported locally")}catch{toast("That file is not a valid Journey snapshot")}};input.click(); }
 function toast(message:string):void { const el=document.createElement("div");el.className="toast";el.textContent=message;document.body.append(el);setTimeout(()=>el.remove(),2600); }
 render();

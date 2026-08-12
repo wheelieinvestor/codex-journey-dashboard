@@ -1,9 +1,9 @@
 # Codex Ops event contract
 
-Journey accepts newline-delimited records whose `schema` is `codex-ops-event/v1`. It recognizes the common event envelope:
+Journey accepts newline-delimited records whose `schema` is `codex-ops-event/v1`. The canonical envelope is:
 
 ```json
-{"schema":"codex-ops-event/v1","event":"scan","timestamp":"2026-08-11T12:00:00Z","project":"Fictional Project","artifact":"local/path"}
+{"schema":"codex-ops-event/v1","kind":"deployment.completed","occurred_at":"2026-08-11T12:00:00Z","feature":"Fictional Project","producer":"production-truth-board","payload":{}}
 ```
 
-Required fields are `schema`, `event`, and ISO timestamp. `project` enables grouping; records without it remain countable provenance but do not invent a project. `scan` and `proposal` demonstrate activity. `apply` may support `implemented` when confidence is adequate. `failure` may create a blocker. A consumer must not translate any event directly to deployed, activated, or verified without evidence specific to those states.
+For compatibility, the legacy aliases `event`, `timestamp`, and `project` are also accepted. The scanner converts valid events into visible project evidence. Failure/block signals create blockers, while explicit merge/deploy event kinds can establish those matching states. No generic activity event establishes deployed, activated, or verified.
