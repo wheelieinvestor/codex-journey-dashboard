@@ -14,3 +14,5 @@ Verified on 2026-08-11:
 | Visual evidence | `node tools/screenshot.mjs` | desktop and 390 px mobile screenshots generated and inspected |
 
 Screenshots: [desktop](dashboard.png) and [mobile](dashboard-mobile.png). The live GitHub CI URL and commit SHA are added to the release handoff. The generated real snapshot stays in `/tmp` and is not committed because its provenance is private.
+
+GitHub CI passed all required checks on the verified release lineage: <https://github.com/wheelieinvestor/codex-journey-dashboard/actions/runs/31555532872>.
