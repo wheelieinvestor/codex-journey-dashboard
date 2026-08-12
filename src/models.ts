@@ -1,0 +1,9 @@
+export const statuses = ["started", "in progress", "waiting", "blocked", "implemented", "merged", "deployed", "activated", "verified", "paused", "abandoned"] as const;
+export type Status = typeof statuses[number];
+export type Evidence = { id: string; type: "codex"|"git"|"github"|"ops"|"manual"; label: string; href?: string; at: string; confidence: number };
+export type Score = { impact: number; urgency: number; unlock: number; staleness: number; risk: number; effort: number };
+export type Project = { id: string; name: string; area: string; status: Status; summary: string; next: string; updatedAt: string; score: Score; evidence: Evidence[]; blocker?: string; gate?: string; milestones: string[]; decisions?: string[] };
+export type Idea = { id: string; title: string; rationale: string; relatedProject?: string; score: number };
+export type JourneyData = { schema: "codex-journey/v1"; generatedAt: string; projects: Project[]; ideas: Idea[] };
+export type OpsEvent = { schema: "codex-ops-event/v1"; event: string; timestamp: string; project?: string; thread_id?: string; artifact?: string };
+export type Correction = { projectId: string; status?: Status; area?: string; note?: string; at: string };
