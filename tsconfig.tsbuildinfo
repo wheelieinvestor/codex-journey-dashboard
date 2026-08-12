@@ -1,1 +1,0 @@
-{"root":["./src/core.ts","./src/fixtures.ts","./src/main.ts","./src/models.ts","./src/vite-env.d.ts","./tests/accessibility.test.ts","./tests/core.test.ts","./tests/e2e/dashboard.spec.ts","./vite.config.ts"],"version":"5.8.3"}
