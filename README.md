@@ -34,6 +34,8 @@ User status corrections persist in browser local storage and take precedence ove
 - [Prioritization model](docs/prioritization.md)
 - [Privacy and security](docs/privacy-security.md)
 - [Codex Ops event contract](docs/event-contract.md)
+- [Six-tool operator guide](docs/operator-guide.md)
+- [Cross-repository compatibility matrix](docs/integration-contracts.md)
 - [Verification](docs/verification.md)
 
 ## Real-data readiness
